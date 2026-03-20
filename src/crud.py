@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+import datetime
 
 from . import models, schemas
 #Create
@@ -36,5 +37,15 @@ def delete_price(db: Session, id: int):
     db.commit()
     return True
 
-
-
+# Filter
+def filter_prices(db: Session, start:datetime.date | None = None, end:datetime.date | None=None, mini:float|None=None, maxi:float |None=None):
+    query = db.query(models.OilPrice)
+    if start:
+        query = query.filter(models.OilPrice.date >=start)
+    if end:
+        query = query.filter(models.OilPrice.date <=end)
+    if mini:
+        query = query.filter(models.OilPrice.price >=mini)
+    if maxi:
+        query = query.filter(models.OilPrice.price <=maxi)
+    return query.all()
