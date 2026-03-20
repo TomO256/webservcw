@@ -50,7 +50,7 @@ db.Base.metadata.create_all(bind=db.engine)
 # FastAPI application metadata
 # ---------------------------------------------------------------------
 app = FastAPI(
-    title="Oil Price Tracker (Secure Edition)",
+    title="Oil Price Tracker",
     description="Enterprise-grade API for oil prices and geopolitical events",
     version="2.0",
     openapi_tags=[
