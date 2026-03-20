@@ -279,9 +279,17 @@ async def min_price(db: Session = Depends(get_db)):
     return {"minimum_price": crud.get_min_price(db)}
 
 
+import traceback
+
 @app.exception_handler(Exception)
 async def main_exception(request, exc):
+    print("\nSERVER ERROR")
+    print(exc)
+    traceback.print_exc()
+    print("END ERROR\n")
+
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal Server Error"}
+        content={"error": str(exc)}
     )
+

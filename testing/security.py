@@ -6,7 +6,7 @@ from . import login
 
 client = login.SecureAPIClient()
 
-BASE = "http://127.0.0.1:8000"
+BASE = "http://81.109.22.44:7578"
 
 def test_invalid_api_key():
     headers = {

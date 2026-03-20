@@ -21,7 +21,7 @@ def run_test_module(module_name):
         if hasattr(module, "run"):
             module.run()
         else:
-            # Run all functions starting with test_
+            # Run all functions
             for attr in dir(module):
                 if attr.startswith("test_"):
                     func = getattr(module, attr)
@@ -54,6 +54,7 @@ def main():
             passed += 1
         else:
             failed += 1
+        time.sleep(0.5)
 
     print("\n======================================")
     print("               SUMMARY")
