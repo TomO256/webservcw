@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException,Response
 from sqlalchemy.orm import Session
 from typing import Optional
 import datetime
@@ -6,7 +6,11 @@ import datetime
 from . import schemas, crud, models,db
 
 db.Base.metadata.create_all(bind=db.engine)
-app = FastAPI(title="Oil Price Tracker")
+app = FastAPI(title="Oil Price Tracker",
+              description="API tracking oil prices and geopolitical events influencing them",
+              openapi_tags=[{"name":"Prices","description":"Oil Price Data"},
+                             {"name":"Analytics","description":"Statistics from the Oil Data"},
+                             {"name":"Events","description":"Geopolitical Event Data"}])
 
 def get_db():
     dbtemp =db.SessionLocal()
@@ -55,6 +59,16 @@ def sort_prices(sort_by:str="date",order:str="asc",db:Session=Depends(get_db)):
         raise HTTPException(300, "Invalid Sort Option")
     return result
 
+### Event Stats
+
+@app.get("/events",tags=["Events"])
+def list_events(db:Session = Depends(get_db)):
+    return db.query(models.OilPrice.filter(models.OilPrice.event_flag==1)).all()
+
+@app.get("/events/type",tags=["Events"])
+def event_type(type:str,db:Session=Depends(get_db)):
+    return db.query(models.OilPrice).filter(models.OilPrice.event_type==type).all()
+
 ## Analytics
 
 @app.get("/analytics/average",tags=["Analytics"])
@@ -68,3 +82,10 @@ def max_price(db:Session=Depends(get_db)):
 @app.get("analytics/min",tags=["Analytics"])
 def min_price(db:Session=Depends(get_db)):
     return {"minimum_price":crud.get_min_price(db)}
+
+
+#Overall error handler
+
+@app.exception_handler(Exception)
+def main_exception(request,exc):
+    return Response.JSONResponse(status_code=500,content={"error":"Internal Server Error","details":str(exc)})
