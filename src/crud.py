@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+import sqlalchemy
 import datetime
 
 from . import models, schemas
@@ -49,3 +50,12 @@ def filter_prices(db: Session, start:datetime.date | None = None, end:datetime.d
     if maxi:
         query = query.filter(models.OilPrice.price <=maxi)
     return query.all()
+
+
+def sort_prices(db: Session, sort_by: str = "date", order: str = "asc"):
+    column = getattr(models.OilPrice, sort_by, None)
+    if not column:
+        return None
+    if order == "desc":
+        return db.query(models.OilPrice).order_by(sqlalchemy.desc(column)).all()
+    return db.query(models.OilPrice).order_by(sqlalchemy.asc(column)).all()

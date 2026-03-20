@@ -47,3 +47,10 @@ def delete_price(id: int, db: Session = Depends(get_db)):
 @app.get("/prices/filter",response_model=list[schemas.OilPrice],tags=["Prices"])
 def filter_prices(start:Optional[datetime.date]=None,end:Optional[datetime.date]=None,mini:Optional[float]=None,maxi:Optional[float]=None,db:Session=Depends(get_db)):
     return crud.filter_prices(db,start,end,mini,maxi)
+
+@app.get("/prices/sort",response_model=list[schemas.OilPrice],tags=["Prices"])
+def sort_prices(sort_by:str="date",order:str="asc",db:Session=Depends(get_db)):
+    result = crud.sort_prices(db,sort_by,order)
+    if result is None:
+        raise HTTPException(300, "Invalid Sort Option")
+    return result
