@@ -5,7 +5,7 @@ import datetime
 from . import models, schemas
 #Create
 def create_price(db: Session, record: schemas.CreateOilPrice):
-    row = models.OilPrice(**record.model_dump())
+    row = models.OilPrice(**record.dict())
     db.add(row)
     db.commit()
     db.refresh(row)
