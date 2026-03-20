@@ -1,6 +1,5 @@
 from . import login
 
-
 client = login.SecureAPIClient()
 
 def test_average_price():

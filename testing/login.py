@@ -24,20 +24,26 @@ class SecureAPIClient:
     def sign_request(self, method: str, path: str, body: str = ""):
         timestamp = str(int(time.time()))
         message = f"{timestamp}{method}{path}".encode() + body.encode()
-
         signature = hmac.new(
             self.api_secret.encode(),
             message,
             hashlib.sha256
         ).hexdigest()
-
         return timestamp, signature
+
     def request(self, method: str, path: str, data: Optional[Dict] = None):
-        body = json.dumps(data) if data else ""
-        timestamp, signature = self.sign_request(method, path, body)
+        body = (
+            json.dumps(data, separators=(",", ":"), sort_keys=True)
+            if data else ""
+        )
+
+        # Normalize path for signing
+        path_for_signing = path.split("?", 1)[0].rstrip("/")
+
+        timestamp, signature = self.sign_request(method, path_for_signing, body)
 
         headers = {
-            "X-API-Key": self.api_key,
+            "X-Api-Key": self.api_key,
             "X-Timestamp": timestamp,
             "X-Signature": signature,
             "Content-Type": "application/json"
@@ -48,20 +54,24 @@ class SecureAPIClient:
         logging.info(f"{method} {url}")
 
         start = time.time()
-        response = requests.request(method, url, headers=headers, data=body)
-        duration = (time.time() - start) * 1000
 
+        if method in ("GET", "DELETE"):
+            response = requests.request(method, url, headers=headers)
+        else:
+            response = requests.request(method, url, headers=headers, data=body)
+
+        duration = (time.time() - start) * 1000
         logging.info(f"Response {response.status_code} in {duration:.2f}ms")
 
         try:
             return response, response.json()
         except:
             return response, None
-        
+
     def get(self, path: str):
         return self.request("GET", path)
 
-    def post(self, path: str, data: Dict[str, Any]):
+    def post(self, path: str, data: dict):
         return self.request("POST", path, data)
 
     def put(self, path: str, data: Dict[str, Any]):
