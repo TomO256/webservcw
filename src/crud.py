@@ -59,3 +59,14 @@ def sort_prices(db: Session, sort_by: str = "date", order: str = "asc"):
     if order == "desc":
         return db.query(models.OilPrice).order_by(sqlalchemy.desc(column)).all()
     return db.query(models.OilPrice).order_by(sqlalchemy.asc(column)).all()
+
+### Analytics
+
+def get_avg_price(db:Session):
+    return db.query(sqlalchemy.func.avg(models.OilPrice.price)).scalar()
+
+def get_max_price(db:Session):
+    return db.query(sqlalchemy.func.max(models.OilPrice.price)).scalar()
+
+def get_min_price(db:Session):
+    return db.query(sqlalchemy.func.min(models.OilPrice.price)).scalar()

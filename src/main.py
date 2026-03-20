@@ -54,3 +54,17 @@ def sort_prices(sort_by:str="date",order:str="asc",db:Session=Depends(get_db)):
     if result is None:
         raise HTTPException(300, "Invalid Sort Option")
     return result
+
+## Analytics
+
+@app.get("/analytics/average",tags=["Analytics"])
+def average_price(db:Session=Depends(get_db)):
+    return {"average_price": crud.get_avg_price(db)}
+
+@app.get("/analytics/max",tags="Analytics")
+def max_price(db:Session=Depends(get_db)):
+    return {"maximum_price":crud.get_max_price(db)}
+
+@app.get("analytics/min",tags=["Analytics"])
+def min_price(db:Session=Depends(get_db)):
+    return {"minimum_price":crud.get_min_price(db)}
