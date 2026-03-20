@@ -1,6 +1,6 @@
-from sqlalchemy import Session
+from sqlalchemy.orm import Session
 
-import models, schemas
+from . import models, schemas
 #Create
 def create_price(db: Session, record: schemas.CreateOilPrice):
     row = models.OilPrice(**record.model_dump())
@@ -17,7 +17,7 @@ def read_one_price(db: Session, id: int):
     return db.query(models.OilPrice).filter(models.OilPrice.id==id).first()
 
 # Update
-def update_price(db: Session, id: int, record: schemas.OilPriceCreate):
+def update_price(db: Session, id: int, record: schemas.CreateOilPrice):
     row = read_one_price(db,id)
     if not row:
         return
