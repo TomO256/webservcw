@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import Optional
+import datetime
 
 from . import schemas, crud, models,db
 
@@ -41,3 +43,7 @@ def delete_price(id: int, db: Session = Depends(get_db)):
     if not delete:
         raise HTTPException(404, "Record not Found")
     return None
+
+@app.get("/prices/filter",response_model=list[schemas.OilPrice],tags=["Prices"])
+def filter_prices(start:Optional[datetime.date]=None,end:Optional[datetime.date]=None,mini:Optional[float]=None,maxi:Optional[float]=None,db:Session=Depends(get_db)):
+    return crud.filter_prices(db,start,end,mini,maxi)
