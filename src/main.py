@@ -370,3 +370,4 @@ async def main_exception(request: Request, exc: Exception):
         status_code=500,
         content={"error": "Internal Server Error"},
     )
+

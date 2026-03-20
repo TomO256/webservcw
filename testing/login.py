@@ -21,26 +21,30 @@ class SecureAPIClient:
         self.api_key = api_key
         self.api_secret = api_secret
 
-    def sign_request(self, method: str, path: str, body: str = ""):
+    def sign_request(self, method: str, path: str, body_bytes: bytes):
         timestamp = str(int(time.time()))
-        message = f"{timestamp}{method}{path}".encode() + body.encode()
+
+        # EXACT match to server logic
+        message = f"{timestamp}{method}{path}".encode() + body_bytes
+
         signature = hmac.new(
             self.api_secret.encode(),
             message,
             hashlib.sha256
         ).hexdigest()
+
         return timestamp, signature
 
     def request(self, method: str, path: str, data: Optional[Dict] = None):
-        body = (
-            json.dumps(data, separators=(",", ":"), sort_keys=True)
-            if data else ""
-        )
+        # Raw body bytes (server uses raw bytes)
+        body_bytes = b""
+        if data is not None:
+            body_bytes = json.dumps(data, separators=(", ", ": ")).encode()
 
-        # Normalize path for signing
+
         path_for_signing = path.split("?", 1)[0].rstrip("/")
 
-        timestamp, signature = self.sign_request(method, path_for_signing, body)
+        timestamp, signature = self.sign_request(method, path_for_signing, body_bytes)
 
         headers = {
             "X-Api-Key": self.api_key,
@@ -55,10 +59,12 @@ class SecureAPIClient:
 
         start = time.time()
 
-        if method in ("GET", "DELETE"):
-            response = requests.request(method, url, headers=headers)
-        else:
-            response = requests.request(method, url, headers=headers, data=body)
+        response = requests.request(
+            method,
+            url,
+            headers=headers,
+            data=body_bytes if method in ("POST", "PUT") else None
+        )
 
         duration = (time.time() - start) * 1000
         logging.info(f"Response {response.status_code} in {duration:.2f}ms")
@@ -79,9 +85,3 @@ class SecureAPIClient:
 
     def delete(self, path: str):
         return self.request("DELETE", path)
-
-
-if __name__ == "__main__":
-    client = SecureAPIClient()
-    response, data = client.get("/prices")
-    print(data)
