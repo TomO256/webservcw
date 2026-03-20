@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any
 
 API_KEY = "dev-api-key"
 API_SECRET = "dev-secret-key"
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://81.109.22.44:7578"
 
 logging.basicConfig(
     level=logging.INFO,
